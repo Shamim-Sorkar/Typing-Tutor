@@ -1,0 +1,456 @@
+#include<stdio.h>
+#include<time.h>
+#include<windows.h>
+#include<string.h>
+
+
+char name[200];
+char mobile[200];
+char p[200];
+int x=1;
+double high=0;
+
+
+void gotoxy(int x,int y)  // For cursor position
+{
+    COORD crd;
+    crd.X=x;
+    crd.Y=y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),crd);
+}
+
+
+void delay(int mseconds)  // For time delay
+{
+    clock_t goal=mseconds+clock();
+    while(goal>clock());
+}
+
+
+void setcolor(int ForgC) //For change colour
+ {
+
+  WORD wColor;
+
+  HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+ if(GetConsoleScreenBufferInfo(hStdOut, &csbi))
+ {
+
+      wColor = (csbi.wAttributes & 0xF0) + (ForgC & 0x0F);
+      SetConsoleTextAttribute(hStdOut, wColor);
+
+ }
+
+ }
+
+
+void scoreboard() // For highest score
+{
+    system("cls");
+    setcolor(13);
+
+    FILE *fp;
+    char player[200],mb[200];
+    double score;
+
+    fp=fopen("record.txt","r");
+
+    while(fscanf(fp,"%s%s%lf",&player,&mb,&score)!= EOF )
+    {
+        if(strcmp(player,name)==0 && strcmp(mb,mobile)==0  && score>high) high=score;
+    }
+
+    gotoxy(30,5);
+    printf("Highest score of %s = %.2lf %%",name,high);
+    delay(3000);
+
+
+    gotoxy(30,8);
+    printf("1.# Main menu #");
+    gotoxy(30,10);
+    printf("2.# Exit #");
+
+    gotoxy(30,12);
+    printf("Enter your choice:: ");
+
+    int k;
+    scanf("%d",&k);
+    if(k==2)
+        {
+            system("cls");
+            gotoxy(40,10);
+            setcolor(25);  // For blue colour
+
+            printf("###  Thank You,Good bye  ###");
+            printf("\n\n\n\n\n");
+
+            delay(5000);
+            exit(1);
+        }
+
+    fclose(fp);
+}
+
+
+void record(double score) // For record the every score of the game
+{
+    FILE *fp;
+
+    fp=fopen("record.txt","a");
+    fprintf(fp,"%s %s %lf\n",name,mobile,score);
+
+    fclose(fp);
+}
+
+
+void forgot() // For forgot password or user name
+{
+    system("cls");
+
+    FILE *fp;
+    fp=fopen("register.txt","r");
+
+    char ch;
+
+    gotoxy(20,5);
+    printf("Enter your mobile number:: ");
+    scanf("%s",mobile);
+
+    int ok=1;
+    char player[200],mb[200],pw[200];
+
+     scanf("%c",&ch);
+        while(fscanf(fp,"%s%s%s",&player,&mb,&pw)!=EOF)
+        {
+            if(strcmp(mobile,mb)==0){
+                ok=0;
+                gotoxy(20,7);
+                printf("Your user name = %s and password = %s",player,pw);
+                delay(5000);
+                break;
+            }
+        }
+
+        if(ok){
+            gotoxy(20,7);
+            printf("Your Mobile number is not found. Please register first.\n\n\n\n");
+            delay(5000);
+            exit(1);
+        }
+
+        fclose(fp);
+
+}
+
+
+void registration()  // For registration
+{
+    system("cls");
+
+    FILE *fp1;
+
+    fp1=fopen("register.txt","a");
+
+
+    gotoxy(20,5);
+    printf("Enter your user name(Not use space in the name):: ");
+    scanf("%s",&name);
+
+    gotoxy(20,7);
+    printf("Enter your mobile number:: ");
+    scanf("%s",&mobile);
+
+    gotoxy(20,9);
+    printf("Enter your password(password size must be 5 characters):: ");
+    scanf("%s",&p);
+
+
+    fprintf(fp1,"%s %s %s\n",name,mobile,p);
+
+    system("cls");
+    gotoxy(40,10);
+    setcolor(25);
+
+    printf("%s , Your registration is completed!!!",name);
+
+    delay(5000);
+
+
+    fclose(fp1);
+
+}
+
+
+void login()  // For login
+{
+        system("cls");
+
+        setcolor(11);
+        gotoxy(30,5);
+        printf("Enter your user name:: ");
+        scanf("%s",&name);
+
+        gotoxy(30,7);
+        printf("Enter your user mobile number:: ");
+        scanf("%s",&mobile);
+
+        gotoxy(30,9);
+        printf("Enter your password:: ");
+        scanf("%s",&p);
+
+
+        FILE *fp;
+        char player[200],ch,pw[200],mb[200];
+        int ok=1;
+
+        fp=fopen("register.txt","r");
+
+        scanf("%c",&ch);
+        while(fscanf(fp,"%s%s%s",&player,&mb,&pw)!=EOF)
+        {
+            if(strcmp(player,name)==0 && strcmp(mobile,mb)==0  && strcmp(pw,p)==0){
+                ok=0;
+                break;
+            }
+        }
+
+        if(ok) {
+                setcolor(12);
+                gotoxy(30,11);
+                printf("Your user Name or Mobile number or Password are not matched");
+
+                int m;
+                gotoxy(30,13);
+                printf("1: Login again");
+                gotoxy(30,14);
+                printf("2: Registration");
+                gotoxy(30,15);
+                printf("3: Forgot password or User name");
+                gotoxy(30,16);
+                printf("4: Exit");
+
+                gotoxy(30,18);
+                printf("Enter your choice:: ");
+                scanf("%d",&m);
+
+                if(m==1) login();
+                if(m==2) registration();
+                if(m==3){
+                   forgot();
+                   login();
+                }
+                else if(m>=4) exit(1);
+
+        }
+        else{
+            setcolor(10);
+            gotoxy(30,11);
+            printf("Your login is successed!!!");
+            delay(3000);
+        }
+
+
+}
+
+
+void startgame()  // For play the game
+{
+   system("cls");
+
+   char ch;
+
+   FILE *fp;
+   char s1[200];
+
+   int i,j;
+   double score;
+
+   fp=fopen("passage.txt","r");
+
+
+   scanf("%c",&ch);
+
+   while( fgets(s1,200,fp)!=EOF)
+   {
+
+       setcolor(11);
+       puts(s1);
+       printf("\n");
+
+       char s2[200];
+       gets(s2);
+
+
+       score=0;
+       int tw=0;  // Total word count in the given string
+       j=0;
+       int sz=strlen(s1);
+
+       for(i=0;i<sz;i++){
+
+       if(s1[i]==' ' || i==sz-1){
+
+
+        int flag=0;
+        tw++;
+
+        for(;j<i;j++){
+
+
+            if(s1[j]==s2[j]) flag=1;
+
+            else {
+
+                flag=0;
+                break;
+            }
+        }
+
+        if(flag) score++;
+        j=i+1;
+
+       }
+
+
+       }
+
+       setcolor(13);
+       gotoxy(30,9);
+       printf("Number of correct word = %.0lf\n",score);
+
+       double accuracy;
+       accuracy = ((1.0*score)/(tw));
+       accuracy=accuracy*100;
+       gotoxy(30,11);
+       printf("Your score is = %.2lf %%\n",accuracy);
+
+
+       record(accuracy);
+
+       setcolor(10);
+       gotoxy(30,13);
+       printf("1.# play again #\n");
+       gotoxy(30,15);
+       printf("2.# main menu #\n");
+       gotoxy(30,17);
+       printf("3.exit\n\n");
+
+       gotoxy(30,19);
+       printf("Enter your choice:: ");
+
+       int q;
+       scanf("%d",&q);
+
+       if(q==2) break;
+       if(q==3)
+       {
+            system("cls");
+            gotoxy(40,10);
+            setcolor(25);
+
+            printf("###  Thank You,Good bye  ###");
+            printf("\n\n\n\n\n");
+
+            delay(5000);
+            exit(1);
+       }
+
+       system("cls");
+
+       scanf("%c",&ch);
+   }
+
+   fclose(fp);
+}
+
+
+
+int main()
+{
+      while(x){
+
+      system("cls");
+
+      setcolor(12) ; // For red colour
+      gotoxy(30,5);
+	  printf("   Assalamualaicum");
+	  gotoxy(30,7);
+	  printf("Welcome to typing tutor ");
+
+      gotoxy(30,10);
+      setcolor(10); // For green colour
+      printf("1.# Login #");
+      gotoxy(30,12);
+      printf("2.# Registration #");
+      gotoxy(30,14);
+      printf("Enter your choice:: ");
+
+      int k;
+      scanf("%d",&k);
+
+      if(k==1){
+        login();
+        x=0;
+      }
+
+      else if(k==2) {
+        registration();
+         x=0;
+      }
+
+      else {
+        system("cls");
+        setcolor(12) ;
+        gotoxy(30,10);
+        printf("You type false.Please type again");
+        delay(4000);
+      }
+
+
+      }
+
+      while(1)
+      {
+
+      system("cls");
+
+      setcolor(10);
+      gotoxy(30,5);
+      printf("1.# Start game #");
+      gotoxy(30,7);
+      printf("2.# Scoreboard #");
+      gotoxy(30,9);
+      printf("3.# Exit #");
+
+      gotoxy(30,11);
+      printf("Enter your choice:: ");
+
+      int k;
+      scanf("%d",&k);
+
+
+      if(k==1)startgame();
+
+      else if(k==2) scoreboard();
+
+      else
+       {
+            system("cls");
+            gotoxy(40,10);
+            setcolor(25);
+
+            printf("###  Thank You,Good bye  ###");
+            printf("\n\n\n\n\n");
+
+            delay(5000);
+
+            break;
+       }
+
+      }
+
+
+    return 0;
+}
